@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mumbai Lake Water Levels</title>
+<meta name="description" content="Daily tracker of Mumbai's seven water-supply lakes, updated automatically." />
+<style>
+  :root {
+    --bg: #f7f9fb;
+    --card-bg: #ffffff;
+    --text: #1a2332;
+    --muted: #5b6b7c;
+    --border: #e2e8ef;
+    --accent: #0284c7;
+    --low: #dc4c3f;
+    --mid: #d99a2b;
+    --high: #0284c7;
+    --full: #1a9e6b;
+    --track: #e9edf2;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1620;
+      --card-bg: #172230;
+      --text: #e7edf3;
+      --muted: #93a4b8;
+      --border: #26333f;
+      --track: #223041;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1620;
+    --card-bg: #172230;
+    --text: #e7edf3;
+    --muted: #93a4b8;
+    --border: #26333f;
+    --track: #223041;
+  }
+  :root[data-theme="light"] {
+    --bg: #f7f9fb;
+    --card-bg: #ffffff;
+    --text: #1a2332;
+    --muted: #5b6b7c;
+    --border: #e2e8ef;
+    --track: #e9edf2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  main {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 2rem 1.25rem 3rem;
+  }
+  header h1 {
+    font-size: 1.5rem;
+    margin: 0 0 0.25rem;
+  }
+  header p {
+    color: var(--muted);
+    margin: 0 0 1.5rem;
+    font-size: 0.95rem;
+  }
+  .summary {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+    align-items: baseline;
+  }
+  .summary .big {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .summary .stat-label {
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin-top: 0.35rem;
+  }
+  .lakes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 0.9rem;
+    margin-bottom: 1.75rem;
+  }
+  .lake-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+  }
+  .lake-card .name {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+  .lake-card .pct {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  .lake-card .ml {
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-left: 0.35rem;
+  }
+  .bar-track {
+    height: 8px;
+    border-radius: 5px;
+    background: var(--track);
+    margin-top: 0.5rem;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 5px;
+  }
+  .trend {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .trend h2 {
+    font-size: 1rem;
+    margin: 0 0 0.75rem;
+  }
+  .trend svg { width: 100%; height: 140px; overflow: visible; }
+  footer {
+    color: var(--muted);
+    font-size: 0.8rem;
+    line-height: 1.6;
+    border-top: 1px solid var(--border);
+    padding-top: 1rem;
+  }
+  footer a { color: var(--accent); }
+  #status { color: var(--muted); font-size: 0.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Mumbai Lake Water Levels</h1>
+    <p>Daily storage in the seven lakes that supply Mumbai's drinking water, updated automatically each morning.</p>
+  </header>
+
+  <div id="status">Loading latest data…</div>
+  <div id="content" style="display:none">
+    <section class="summary" id="summary"></section>
+    <section class="lakes" id="lakes"></section>
+    <section class="trend">
+      <h2 id="trend-title">Total storage — last 30 days</h2>
+      <svg id="trend-chart" viewBox="0 0 600 140" preserveAspectRatio="none"></svg>
+    </section>
+  </div>
+
+  <footer>
+    Data: <a href="https://mumbailakewaterlevel.in/" target="_blank" rel="noopener">mumbailakewaterlevel.in</a>,
+    originally sourced from the BMC Hydraulic Engineer's Department, Bhandup Complex.
+    Fetched daily via an automated script; figures may lag the official BMC report by a few hours.
+  </footer>
+</main>
+
+<script>
+function levelColor(pct) {
+  if (pct >= 100) return "var(--full)";
+  if (pct >= 75) return "var(--high)";
+  if (pct >= 50) return "var(--mid)";
+  return "var(--low)";
+}
+
+function fmtML(n) {
+  return new Intl.NumberFormat("en-IN").format(n) + " ML";
+}
+
+async function main() {
+  const status = document.getElementById("status");
+  try {
+    const [latestRes, historyRes] = await Promise.all([
+      fetch("data/latest.json", { cache: "no-store" }),
+      fetch("data/history.csv", { cache: "no-store" }),
+    ]);
+    if (!latestRes.ok) throw new Error("latest.json not found yet");
+    const latest = await latestRes.json();
+    const historyText = historyRes.ok ? await historyRes.text() : "";
+
+    renderSummary(latest);
+    renderLakes(latest);
+    renderTrend(historyText);
+
+    status.style.display = "none";
+    document.getElementById("content").style.display = "block";
+  } catch (err) {
+    status.textContent = "No data yet — the first automated run hasn't published data/latest.json.";
+    console.error(err);
+  }
+}
+
+function renderSummary(latest) {
+  const el = document.getElementById("summary");
+  const date = new Date(latest.date + "T00:00:00");
+  const dateStr = date.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
+  el.innerHTML = `
+    <div>
+      <div class="big" style="color:${levelColor(latest.total_pct)}">${latest.total_pct}%</div>
+      <div class="stat-label">Total storage as of ${dateStr}</div>
+    </div>
+    <div>
+      <div class="big" style="font-size:1.4rem">${fmtML(latest.total_ml)}</div>
+      <div class="stat-label">of ${fmtML(latest.total_capacity_ml)} capacity</div>
+    </div>
+  `;
+}
+
+function renderLakes(latest) {
+  const el = document.getElementById("lakes");
+  el.innerHTML = "";
+  for (const [name, v] of Object.entries(latest.lakes)) {
+    const card = document.createElement("div");
+    card.className = "lake-card";
+    const color = levelColor(v.pct);
+    card.innerHTML = `
+      <div class="name">${name}</div>
+      <span class="pct" style="color:${color}">${v.pct}%</span><span class="ml">${fmtML(v.ml)}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(v.pct, 100)}%; background:${color}"></div></div>
+    `;
+    el.appendChild(card);
+  }
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  const headers = lines[0].split(",");
+  return lines.slice(1).map((line) => {
+    const cells = line.split(",");
+    const row = {};
+    headers.forEach((h, i) => (row[h] = cells[i]));
+    return row;
+  });
+}
+
+function renderTrend(historyText) {
+  const svg = document.getElementById("trend-chart");
+  const title = document.getElementById("trend-title");
+  if (!historyText.trim()) {
+    svg.parentElement.style.display = "none";
+    return;
+  }
+  const rows = parseCSV(historyText).slice(-30);
+  title.textContent = `Total storage — last ${rows.length} day${rows.length === 1 ? "" : "s"}`;
+
+  const w = 600, h = 140, pad = 8;
+  const values = rows.map((r) => parseFloat(r.total_pct));
+  const min = Math.min(...values, 0);
+  const max = Math.max(...values, 100);
+  const range = max - min || 1;
+
+  const points = values.map((v, i) => {
+    const x = rows.length === 1 ? w / 2 : (i / (rows.length - 1)) * (w - pad * 2) + pad;
+    const y = h - pad - ((v - min) / range) * (h - pad * 2);
+    return [x, y];
+  });
+
+  const path = points.map((p, i) => (i === 0 ? "M" : "L") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+  const areaPath = path + ` L${points[points.length - 1][0].toFixed(1)},${h} L${points[0][0].toFixed(1)},${h} Z`;
+
+  svg.innerHTML = `
+    <path d="${areaPath}" fill="var(--accent)" opacity="0.12"></path>
+    <path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
+    <circle cx="${points[points.length - 1][0]}" cy="${points[points.length - 1][1]}" r="4" fill="var(--accent)"></circle>
+  `;
+}
+
+main();
+</script>
+</body>
+</html>
