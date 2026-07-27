@@ -257,7 +257,11 @@ function renderTrend(historyText) {
     return;
   }
   const rows = parseCSV(historyText).slice(-30);
-  title.textContent = `Total storage — last ${rows.length} day${rows.length === 1 ? "" : "s"}`;
+  if (rows.length < 2) {
+    svg.parentElement.style.display = "none";
+    return;
+  }
+  title.textContent = `Total storage — last ${rows.length} days`;
 
   const w = 600, h = 140, pad = 8;
   const values = rows.map((r) => parseFloat(r.total_pct));
@@ -266,7 +270,7 @@ function renderTrend(historyText) {
   const range = max - min || 1;
 
   const points = values.map((v, i) => {
-    const x = rows.length === 1 ? w / 2 : (i / (rows.length - 1)) * (w - pad * 2) + pad;
+    const x = (i / (rows.length - 1)) * (w - pad * 2) + pad;
     const y = h - pad - ((v - min) / range) * (h - pad * 2);
     return [x, y];
   });
