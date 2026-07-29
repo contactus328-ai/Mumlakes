@@ -2,8 +2,10 @@ name: Daily lake level update
 
 on:
   schedule:
-    # 01:00 UTC = 06:30 IST, shortly after BMC's ~06:00 IST daily report
-    - cron: "0 1 * * *"
+    # Hourly, so BMC's ~06:00 IST daily report is picked up soon after it
+    # posts even if the exact publish time varies. Most runs find no new
+    # data and the commit step is a no-op ("No changes to commit").
+    - cron: "0 * * * *"
   workflow_dispatch: {}
 
 permissions:
