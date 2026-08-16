@@ -1,21 +1,21 @@
 {
-  "date": "2026-08-15",
+  "date": "2026-08-16",
   "report_time": "06:00",
-  "total_pct": 91.52,
-  "total_ml": 1324585,
+  "total_pct": 92.24,
+  "total_ml": 1334979,
   "total_capacity_ml": 1447363,
   "lakes": {
     "Bhatsa": {
-      "pct": 89.74,
-      "ml": 643492
+      "pct": 90.62,
+      "ml": 649774
     },
     "Upper Vaitarna": {
-      "pct": 82.32,
-      "ml": 186913
+      "pct": 83.2,
+      "ml": 188898
     },
     "Middle Vaitarna": {
-      "pct": 95.85,
-      "ml": 185507
+      "pct": 96.95,
+      "ml": 187633
     },
     "Modak Sagar": {
       "pct": 100.0,
@@ -36,5 +36,5 @@
   },
   "source_url": "https://mumbailakewaterlevel.in/",
   "original_source": "BMC Hydraulic Engineer's Department, Bhandup Complex",
-  "fetched_at": "2026-08-16T03:02:14+00:00"
+  "fetched_at": "2026-08-16T04:37:52+00:00"
 }
