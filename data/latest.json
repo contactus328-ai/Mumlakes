@@ -1,40 +1,40 @@
 {
-  "date": "2026-09-06",
+  "date": "2026-09-07",
   "report_time": "06:00",
-  "total_pct": 95.97,
-  "total_ml": 1389075,
+  "total_pct": 96.28,
+  "total_ml": 1393459,
   "total_capacity_ml": 1447363,
   "lakes": {
     "Bhatsa": {
-      "pct": 96.1,
-      "ml": 689053
+      "pct": 96.67,
+      "ml": 693168
     },
     "Upper Vaitarna": {
-      "pct": 91.51,
-      "ml": 207760
+      "pct": 91.93,
+      "ml": 208724
     },
     "Middle Vaitarna": {
-      "pct": 96.92,
-      "ml": 187573
+      "pct": 96.64,
+      "ml": 187026
     },
     "Modak Sagar": {
-      "pct": 98.13,
-      "ml": 126510
+      "pct": 97.98,
+      "ml": 126319
     },
     "Tansa": {
-      "pct": 98.37,
-      "ml": 142710
+      "pct": 98.41,
+      "ml": 142769
     },
     "Vihar": {
       "pct": 100.0,
       "ml": 27698
     },
     "Tulsi": {
-      "pct": 96.59,
-      "ml": 7771
+      "pct": 96.38,
+      "ml": 7755
     }
   },
   "source_url": "https://mumbailakewaterlevel.in/",
   "original_source": "BMC Hydraulic Engineer's Department, Bhandup Complex",
-  "fetched_at": "2026-09-07T00:45:47+00:00"
+  "fetched_at": "2026-09-07T05:48:41+00:00"
 }
